@@ -72,7 +72,7 @@ fun Greeting(buget: Int,modifier: Modifier = Modifier) {
 
     ) {
         Text(
-            text = "Your buget is: $buget",
+            text = "Your budget is: $buget",
             modifier = modifier
         )
         Divider()
