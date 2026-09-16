@@ -1,13 +1,10 @@
 package com.example.expensetracker.ViewModel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import com.example.expensetracker.DAO.ExpenseDao
-import com.example.expensetracker.DTO.Expense
-import com.example.expensetracker.DTO.Type
+import com.example.expensetracker.Model.Expense
+import com.example.expensetracker.Model.Type
 import com.example.expensetracker.MainActivity
 import kotlinx.coroutines.flow.Flow
-import java.time.Instant
 import java.util.Date
 
 

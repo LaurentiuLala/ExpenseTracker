@@ -1,6 +1,6 @@
 package com.example.expensetracker.Database
 import androidx.room3.ColumnTypeConverters
-import com.example.expensetracker.DTO.Expense
+import com.example.expensetracker.Model.Expense
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import com.example.expensetracker.Converters.Converters

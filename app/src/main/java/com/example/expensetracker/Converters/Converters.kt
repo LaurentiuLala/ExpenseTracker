@@ -1,6 +1,6 @@
 package com.example.expensetracker.Converters
 
-import com.example.expensetracker.DTO.Type
+import com.example.expensetracker.Model.Type
 import androidx.room3.ColumnTypeConverter
 import java.util.Date
 

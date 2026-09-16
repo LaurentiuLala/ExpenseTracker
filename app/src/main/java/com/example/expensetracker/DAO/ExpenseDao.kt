@@ -1,11 +1,10 @@
 package com.example.expensetracker.DAO
 
-import androidx.lifecycle.LiveData
 import androidx.room3.Dao
 import androidx.room3.Insert
 import androidx.room3.Query
-import com.example.expensetracker.DTO.Expense
-import com.example.expensetracker.DTO.Type
+import com.example.expensetracker.Model.Expense
+import com.example.expensetracker.Model.Type
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
