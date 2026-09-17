@@ -1,263 +1,265 @@
 # Expense Tracker
 
-Expense Tracker este o aplicatie Android dezvoltata in Kotlin si Jetpack Compose, care permite utilizatorului sa isi gestioneze si monitorizeze cheltuielile.
+Expense Tracker is an Android application developed in Kotlin using Jetpack Compose. The application allows users to manage their expenses, organize them by category, calculate spending totals, and manage a personal budget.
 
-Aplicatia permite adaugarea, modificarea si stergerea cheltuielilor, precum si calcularea automata a sumelor cheltuite pe categorii. Utilizatorul poate seta un buget, iar aplicatia calculeaza suma ramasa sau valoarea depasita.
+## Features
 
-## Functionalitati
-
-* Adaugarea unei cheltuieli
-* Editarea unei cheltuieli
-* Stergerea unei cheltuieli
-* Categorii pentru cheltuieli:
+* Add new expenses
+* Edit existing expenses
+* Delete expenses
+* Categorize expenses:
 
   * Food
   * Transport
   * Entertainment
   * Other
-* Calcularea automata a totalului cheltuielilor
-* Calcularea cheltuielilor pe categorii
-* Setarea si modificarea bugetului
-* Calcularea sumei ramase din buget
-* Afisarea datoriei atunci cand cheltuielile depasesc bugetul
-* Salvarea persistenta a datelor
+* Calculate total expenses
+* Calculate expenses by category
+* Set and edit a personal budget
+* Display the remaining budget
+* Display the amount exceeded when expenses are higher than the budget
+* Store expense data locally
+* Automatically update the UI when data changes
 
-## Tehnologii
+## Technologies
 
 * Kotlin
 * Android
 * Jetpack Compose
-* Room
+* Room Database
 * DataStore Preferences
 * Kotlin Coroutines
-* Flow
+* Kotlin Flow
 * ViewModel
 * KSP
 
-## Arhitectura
+## Architecture
 
-Aplicatia foloseste o separare a responsabilitatilor intre componente.
+The application follows a separation of responsibilities between the UI, ViewModel, DAO, and database.
 
 ```text
 UI / Composable
-       |
-       v
-   ViewModel
-      / \
-     /   \
-    v     v
-  DAO   DataStore
-   |       |
-   v       v
- Room    Budget
-Database
+      ↓
+ViewModel
+      ↓
+DAO
+      ↓
+Room Database
 ```
 
-### UI
+The budget is stored separately using DataStore:
 
-Interfata este realizata folosind Jetpack Compose.
+```text
+HomePage
+    ↓
+DataStore
+    ↓
+DataStore Preferences
+```
 
-Componentele UI sunt responsabile de afisarea datelor si de interactiunea cu utilizatorul. UI-ul nu acceseaza direct baza de date.
+## UI Layer
 
-### ViewModel
+The UI is implemented using Jetpack Compose.
 
-`ExpenseViewModel` face legatura dintre UI si sursele de date.
+The UI is responsible for:
 
-Responsabilitatile sale includ:
+* Displaying information
+* Reading user input
+* Handling button interactions
+* Displaying dialogs
+* Navigating between screens
+* Observing application state
 
-* primirea actiunilor din UI
-* apelarea operatiilor DAO
-* expunerea listei de cheltuieli catre UI
-* gestionarea operatiilor suspend
-* transmiterea datelor necesare catre DAO
+The UI does not directly communicate with the database. Database operations are handled through the ViewModel and DAO.
 
-Aceasta separare permite UI-ului sa ramana concentrat pe afisare si interactiune.
+## ViewModel
 
-### DAO
+The `ExpenseViewModel` acts as an intermediary between the UI and the database.
 
-`ExpenseDao` este responsabil pentru comunicarea cu baza de date Room.
+Its responsibilities include:
 
-Acesta contine operatii precum:
+* Adding expenses
+* Updating expenses
+* Deleting expenses
+* Exposing the expense list to the UI
+* Sending database operations to the DAO
 
-* obtinerea tuturor cheltuielilor
-* adaugarea unei cheltuieli
-* modificarea unei cheltuieli
-* stergerea unei cheltuieli
+The ViewModel receives the DAO through its constructor instead of creating the database connection itself. This keeps the ViewModel independent from the database implementation.
 
-DAO-ul nu contine logica UI.
+## DAO
 
-### Room
+The `ExpenseDao` is responsible for communicating with the Room database.
 
-Room este utilizat pentru stocarea cheltuielilor.
+It contains operations for:
 
-Entitatea principala este `Expense`, care contine informatii precum:
+* Retrieving all expenses
+* Adding expenses
+* Updating expenses
+* Deleting expenses
+
+The DAO exposes the expense list as:
+
+```kotlin
+Flow<List<Expense>>
+```
+
+Using `Flow` allows the application to react automatically when the database changes.
+
+## Room Database
+
+Room is used to store structured expense data locally.
+
+The `Expense` entity contains information such as:
 
 * ID
-* titlu
-* descriere
-* pret
-* tip
-* data crearii
+* Title
+* Description
+* Creation date
+* Expense type
+* Price
 
-Lista cheltuielilor este expusa prin `Flow<List<Expense>>`, permitand UI-ului sa reactioneze automat atunci cand datele din baza de date se modifica.
+Room is suitable for this data because expenses represent structured information that requires operations such as inserting, updating, deleting, and querying records.
 
-### DataStore
+## DataStore
 
-DataStore Preferences este utilizat pentru stocarea bugetului.
+DataStore Preferences is used to store the user's budget.
 
-Bugetul este tratat ca o preferinta a aplicatiei, nu ca o entitate relationala.
+The budget is a simple value, so using Room for it would add unnecessary database structure.
 
-Astfel, aplicatia foloseste:
-
-```text
-Room
-    -> datele cheltuielilor
-
-DataStore
-    -> bugetul aplicatiei
-```
-
-DataStore expune bugetul printr-un `Flow`, iar Compose poate observa modificarile si actualiza automat interfata.
-
-## Coroutines si suspend
-
-Operatiile care modifica baza de date sau DataStore sunt executate folosind coroutines.
-
-Functiile DAO precum `addExpense`, `delete` si `update` sunt `suspend`, deoarece operatiile de acces la date nu trebuie executate direct pe thread-ul UI.
-
-In Compose, acestea sunt apelate folosind un `CoroutineScope`.
+DataStore provides a simple key-value storage mechanism:
 
 ```text
-UI
- |
- v
-Coroutine
- |
- v
-ViewModel
- |
- v
-DAO / DataStore
+"budget" → Double
 ```
+
+The budget is exposed as a `Flow`, allowing the UI to automatically update when the stored value changes.
+
+## Coroutines
+
+Kotlin Coroutines are used for database and DataStore operations.
+
+Operations such as inserting, updating, and deleting expenses are `suspend` functions.
+
+The operations are executed inside a coroutine using `launch`, allowing the application to perform these operations without blocking the UI.
 
 ## Reactive UI
 
-Aplicatia foloseste `Flow` impreuna cu `collectAsState()` pentru a mentine interfata sincronizata cu datele.
+The application uses `Flow` together with Compose state to keep the UI synchronized with the database.
 
-De exemplu:
+The process works as follows:
 
 ```text
-Room
-  |
-  v
+Room Database
+      ↓
+DAO
+      ↓
 Flow<List<Expense>>
-  |
-  v
+      ↓
+ViewModel
+      ↓
 collectAsState()
-  |
-  v
-Compose State
-  |
-  v
-Recomposition
+      ↓
+Compose UI
 ```
 
-Atunci cand o cheltuiala este adaugata, modificata sau stearsa, lista emisa de Room se modifica, iar Compose poate actualiza automat interfata.
+When an expense is added, edited, or deleted, Room emits a new list through the `Flow`.
 
-## Calcularea cheltuielilor
+Compose receives the updated state and recomposes the affected UI automatically.
 
-Calcularea sumelor este separata intr-o componenta `PriceCalculation`.
+For example, the total expense amount does not need to be manually updated after every database operation. The total is recalculated from the updated expense list.
 
-Aceasta primeste lista de cheltuieli si poate calcula:
+## Expense Calculations
 
-* totalul cheltuielilor
-* totalul pentru Food
-* totalul pentru Transport
-* totalul pentru Entertainment
-* totalul pentru Other
+The `PriceCalculation` class is responsible for calculating expense values.
 
-Separarea acestei logici de UI permite ca partea de calcul sa fie independenta de interfata.
+It provides methods for:
 
-## Gestionarea bugetului
+* Total expenses
+* Food expenses
+* Transport expenses
+* Entertainment expenses
+* Other expenses
 
-Bugetul este afisat pe pagina principala si poate fi modificat printr-un dialog accesibil printr-un buton de tip Settings.
+The calculations are performed on the list of expenses received from the ViewModel.
 
-Fluxul este:
+This keeps calculation logic separate from the UI.
+
+## Budget Calculation
+
+The application compares the user's budget with the total expenses.
 
 ```text
-User
- |
- v
-Settings
- |
- v
-DialogBudget
- |
- v
-saveBudget()
- |
- v
-DataStore
- |
- v
-Flow<Double>
- |
- v
-HomePage
+Budget - Total Expenses = Remaining Amount
 ```
 
-Atunci cand bugetul se modifica, noua valoare este emisa prin `Flow`, iar HomePage se recomputeaza automat.
+If the result is:
 
-## Structura proiectului
+* Positive → the user still has money available
+* Zero → the entire budget has been used
+* Negative → the expenses exceeded the budget
+
+The application displays the exceeded amount as a positive value to make it easier to understand.
+
+## Data Validation and Responsibility
+
+Some application rules are handled outside the UI.
+
+For example, when adding an expense, the ViewModel creates the `Expense` object that will be sent to the DAO.
+
+This provides better control over the data that reaches the database and prevents the UI from being responsible for all application logic.
+
+The UI is mainly responsible for collecting user input, while the ViewModel handles application logic and communication with the DAO.
+
+This separation makes the application easier to maintain and reduces the amount of logic inside the UI.
+
+## Project Structure
 
 ```text
 com.example.expensetracker
-|
+│
 ├── DAO
-|   └── ExpenseDao
-|
+│   └── ExpenseDao
+│
 ├── Database
-|   └── ExpenseDATABASE
-|
+│   ├── ExpenseDATABASE
+│   └── DatabaseProvider
+│
 ├── DataStore
-|   └── BudgetDataStore
-|
+│   └── BudgetDataStore
+│
 ├── Model
-|   └── Expense
-|   └── Type
-|
+│   ├── Expense
+│   └── Type
+│
 ├── ViewModel
-|   ├── ExpenseViewModel
-|   └── ExpenseViewModelFactory
-|
+│   ├── ExpenseViewModel
+│   └── ExpenseViewModelFactory
+│
 ├── Service
-|   ├── DialogEdit
-|   |   ├── AlertDialogEdit
-|   |   └── DialogBudget
-|   |
-|   └── PriceCalculation
-|
-├── Interface
-|   ├── HomePage
-|   ├── AddPage
-|   └── ViewPage
-|
-└── Pages
-    ├── AddPage
-    └── ViewListPage
+│   ├── PriceCalculation
+│   └── DialogEdit
+│
+└── Interface
+    └── HomePage
 ```
 
-## Principii utilizate
+## Main Principles
 
-Proiectul urmareste cateva principii de baza:
+The project follows several important software development principles:
 
-* separarea responsabilitatilor
-* UI separat de accesul la date
-* folosirea ViewModel pentru logica dintre UI si date
-* folosirea DAO pentru accesul la Room
-* folosirea DataStore pentru preferinte simple
-* folosirea Flow pentru date reactive
-* folosirea Coroutines pentru operatii suspend
-* mentinerea logicii de calcul separata de UI
+* Separation of concerns
+* Clear responsibilities for each component
+* Reactive UI updates
+* Local data persistence
+* Reusable business logic
+* Database access through DAO
+* Communication between UI and database through ViewModel
+* Using the appropriate storage solution for different types of data
 
-Scopul acestei structuri este ca fiecare componenta sa aiba o responsabilitate clara si ca proiectul sa fie mai usor de inteles, modificat si extins.
+## Summary
+
+Expense Tracker combines Jetpack Compose, Room, DataStore, ViewModel, Coroutines, and Flow to create a local expense management application.
+
+Room is used for structured expense data, while DataStore is used for the simple budget preference.
+
+The application uses a reactive architecture where changes in stored data are automatically reflected in the user interface.
