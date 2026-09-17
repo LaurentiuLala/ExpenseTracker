@@ -1,10 +1,10 @@
 package com.example.expensetracker.Database
 import androidx.room3.ColumnTypeConverters
-import com.example.expensetracker.Model.Expense
+import com.example.expensetracker.Model.ExpenseModel.Expense
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import com.example.expensetracker.Converters.Converters
-import com.example.expensetracker.DAO.ExpenseDao
+import com.example.expensetracker.DAO.ExpenseDAO.ExpenseDao
 
 
 @Database(entities = [Expense::class], version = 1)

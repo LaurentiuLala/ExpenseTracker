@@ -1,10 +1,6 @@
-package com.example.expensetracker
+package com.example.expensetracker.Interface.AddPage
 
 import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,7 +11,6 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Button
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -29,36 +24,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.example.expensetracker.DAO.ExpenseDao
-import com.example.expensetracker.Model.Expense
-import com.example.expensetracker.Model.Type
-import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
+import com.example.expensetracker.Pages.HomePage
+import com.example.expensetracker.Model.ExpenseModel.Expense
+import com.example.expensetracker.Model.ExpenseModel.Type
+import com.example.expensetracker.ViewModel.ExpenseViewModel
 import kotlinx.coroutines.launch
 import java.util.Date
 
-class MainActivity2 : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            ExpenseTrackerTheme {
-                val expenseDao = MainActivity.database.getExpenseDao()
-
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting2(
-                        modifier = Modifier.padding(innerPadding),
-                        expenseDao = expenseDao
-                    )
-                }
-            }
-        }
-            }
-        }
-
-
-
 @Composable
-fun Greeting2(modifier: Modifier = Modifier, expenseDao: ExpenseDao) {
+fun AddPage(modifier: Modifier = Modifier, viewmodel: ExpenseViewModel) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var title by remember { mutableStateOf("") }
@@ -115,16 +89,14 @@ fun Greeting2(modifier: Modifier = Modifier, expenseDao: ExpenseDao) {
             }
         }
 
-            Button(onClick = {val expense = Expense(title=title, description = description,price=price.toDouble(), type = Type.valueOf(selectedOption), createdAT = Date())
-            scope.launch{expenseDao.addExpense(expense)}
-                val i = Intent(context, MainActivity::class.java)
-                context.startActivity(i)},modifier = modifier.padding(12.dp))
-            {
-                Text(text = "save",modifier)
-            }
-            }
-
-
+        Button(onClick = {val expense = Expense(title=title, description = description,price=price.toDouble(), type = Type.valueOf(selectedOption), createdAT = Date())
+            scope.launch{viewmodel.addExpense(expense)
+            val i = Intent(context, HomePage::class.java)
+            context.startActivity(i)}},modifier = modifier.padding(12.dp))
+        {
+            Text(text = "save",modifier)
+        }
     }
 
 
+}

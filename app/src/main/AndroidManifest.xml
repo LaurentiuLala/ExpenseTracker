@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ExpenseTracker">
         <activity
-            android:name=".MainActivity"
+            android:name=".Pages.HomePage"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.ExpenseTracker"
@@ -24,13 +24,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity2"
+            android:name=".Pages.AddPage"
             android:exported="false"
             android:label="@string/title_activity_main2"
             android:theme="@style/Theme.ExpenseTracker"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ViewList"
+            android:name=".Pages.ViewListPage"
             android:exported="false"
             android:label="@string/title_activity_view_list"
             android:theme="@style/Theme.ExpenseTracker"
